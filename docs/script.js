@@ -33,6 +33,7 @@ const translations = {
     exchange_result: '🎅 After the exchange is complete, a gift code from a mysterious Santa will appear in your <code>submissions/YOUR_ID/</code> folder!',
     runtimes_title: '💾 Supported Runtimes',
     footer_status: 'Status: WAITING_FOR_SUBMISSIONS',
+    gift_count_msg: '🎁 Collected <strong>{count}</strong> gifts so far!',
   },
   'zh-TW': {
     title: 'SantaCode 2025',
@@ -67,6 +68,7 @@ const translations = {
     exchange_result: '🎅 交換完成後，你的 <code>submissions/你的ID/</code> 資料夾中會出現來自神秘聖誕老人的禮物程式碼！',
     runtimes_title: '💾 支援語言環境',
     footer_status: '狀態: 等待投稿中',
+    gift_count_msg: '🎁 目前已收到 <strong>{count}</strong> 份禮物！',
   },
   ja: {
     title: 'SantaCode 2025',
@@ -102,8 +104,49 @@ const translations = {
     exchange_result: '🎅 交換完了後、あなたの <code>submissions/あなたのID/</code> フォルダに謎のサンタからのギフトコードが現れます！',
     runtimes_title: '💾 対応ランタイム',
     footer_status: 'ステータス: 投稿待ち',
+    gift_count_msg: '🎁 現在 <strong>{count}</strong> 個のギフトが集まっています！',
   },
 };
+
+let currentGiftCount = null;
+
+function updateGiftCountDisplay(lang) {
+  const counterEl = document.getElementById('gift-counter');
+  const statusEl = document.getElementById('event-status');
+  if (!counterEl || !statusEl || currentGiftCount === null) return;
+  
+  if (currentGiftCount > 0) {
+    const msgTemplate = translations[lang]['gift_count_msg'];
+    if (msgTemplate) {
+      counterEl.innerHTML = msgTemplate.replace('{count}', currentGiftCount);
+      counterEl.style.display = 'inline';
+      statusEl.style.display = 'none';
+    }
+  } else {
+    counterEl.style.display = 'none';
+    statusEl.style.display = 'inline';
+  }
+}
+
+async function fetchGiftCount() {
+  try {
+    const response = await fetch('https://api.github.com/repos/gdg-kh/SantaCode/contents/submissions');
+    if (!response.ok) return;
+    
+    const data = await response.json();
+    // Filter out 'example-santa' and non-directory items
+    const count = data.filter(item => item.type === 'dir' && item.name !== 'example-santa').length;
+    
+    currentGiftCount = count;
+    
+    // Update display with current active language
+    const currentLang = document.querySelector('.lang-btn.active')?.dataset.lang || 'en';
+    updateGiftCountDisplay(currentLang);
+    
+  } catch (e) {
+    console.log('Failed to fetch gift count', e);
+  }
+}
 
 function setLanguage(lang) {
   if (!translations[lang]) return;
@@ -115,6 +158,9 @@ function setLanguage(lang) {
       element.innerHTML = translations[lang][key];
     }
   });
+
+  // Update gift counter if count is available
+  updateGiftCountDisplay(lang);
 
   // Update buttons state
   document.querySelectorAll('.lang-btn').forEach((btn) => {
@@ -147,8 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   setLanguage(defaultLang);
+  fetchGiftCount(); // Fetch count on load
 
   document.querySelectorAll('.lang-btn').forEach((btn) => {
+
     btn.addEventListener('click', (e) => {
       const selectedLang = e.target.dataset.lang;
       setLanguage(selectedLang);
