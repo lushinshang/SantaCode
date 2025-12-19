@@ -2,7 +2,7 @@ import Foundation
 
 precedencegroup PipeRight {
     associativity: left
-    higherThan: DefaultPrecedence
+    higherThan: AssignmentPrecedence
 }
 
 infix operator |> : PipeRight
@@ -24,7 +24,7 @@ func seed() -> (Int) -> Seed
         Seed(height: $0)
     }
 }
-let leafs: Array<String> = "🍏🍎🍐🍊🍋🍓🍈🍑🥭🫑".split(separator: "").map(String.init)
+let leafs: Array<String> = "🍏🍎🍐🍊🍋🍓🍈🍑🥭🫑".map(String.init)
 
 func watering() -> (Seed) -> String
 {
