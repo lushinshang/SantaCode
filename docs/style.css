@@ -140,6 +140,7 @@ pre {
     transition: all 0.3s ease;
     cursor: default;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    min-width: 0; /* Important for grid to shrink items */
 }
 
 .gift-card:hover {
@@ -150,12 +151,16 @@ pre {
 
 .gift-card .icon {
     font-size: 1.2em;
+    flex-shrink: 0;
 }
 
 .gift-card .name {
     font-family: var(--term-font);
     color: #e6edf3;
     font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Footer */
